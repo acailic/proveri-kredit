@@ -11,16 +11,16 @@ import { calculateRemainingPayments } from '../utils/creditCalculator';
 
 export const CreditStatusForm = () => {
   const [unsettledAmount, setUnsettledAmount] = useState<string>('');
+  const [creditAmount, setCreditAmount] = useState<string>('92663.85');
+  const [annuity, setAnnuity] = useState<string>('786.25');
   const [calculationResult, setCalculationResult] = useState<any>(null);
 
   // Credit details from the document
   const creditDetails = {
-    bankName: "Banca Intesa ad Beograd",
+    bankName: "Banca ad Beograd",
     phone: "011/310-8888",
     date: "09.07.2025.",
     currency: "EUR",
-    originalAmount: 92663.85,
-    annuity: 786.25,
     nominalRate: 3.39,
     effectiveRate: 3.76,
     startDate: "20.01.2022",
@@ -29,14 +29,17 @@ export const CreditStatusForm = () => {
 
   const handleCalculate = () => {
     const amount = parseFloat(unsettledAmount);
-    if (amount && amount > 0) {
-      const result = calculateRemainingPayments(amount, creditDetails.annuity, creditDetails.nominalRate);
+    const annuityValue = parseFloat(annuity);
+    if (amount && amount > 0 && annuityValue && annuityValue > 0) {
+      const result = calculateRemainingPayments(amount, annuityValue, creditDetails.nominalRate);
       setCalculationResult(result);
     }
   };
 
   const handleReset = () => {
     setUnsettledAmount('');
+    setCreditAmount('92663.85');
+    setAnnuity('786.25');
     setCalculationResult(null);
   };
 
@@ -67,16 +70,26 @@ export const CreditStatusForm = () => {
                 <p className="text-lg font-bold text-blue-800">{creditDetails.currency}</p>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-semibold">Iznos kredita:</Label>
-                <p className="text-lg font-bold text-green-700">
-                  {creditDetails.originalAmount.toLocaleString('sr-RS', { minimumFractionDigits: 2 })} EUR
-                </p>
+                <Label htmlFor="credit-amount" className="text-sm font-semibold">Iznos kredita:</Label>
+                <Input
+                  id="credit-amount"
+                  type="number"
+                  step="0.01"
+                  value={creditAmount}
+                  onChange={(e) => setCreditAmount(e.target.value)}
+                  className="text-lg font-bold text-green-700"
+                />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-semibold">Anuitet:</Label>
-                <p className="text-lg font-bold text-purple-700">
-                  {creditDetails.annuity.toLocaleString('sr-RS', { minimumFractionDigits: 2 })} EUR
-                </p>
+                <Label htmlFor="annuity" className="text-sm font-semibold">Anuitet:</Label>
+                <Input
+                  id="annuity"
+                  type="number"
+                  step="0.01"
+                  value={annuity}
+                  onChange={(e) => setAnnuity(e.target.value)}
+                  className="text-lg font-bold text-purple-700"
+                />
               </div>
             </div>
             
@@ -117,7 +130,7 @@ export const CreditStatusForm = () => {
               />
             </div>
             <div className="flex gap-2">
-              <Button onClick={handleCalculate} className="flex items-center gap-2" disabled={!unsettledAmount}>
+              <Button onClick={handleCalculate} className="flex items-center gap-2" disabled={!unsettledAmount || !annuity}>
                 <TrendingDown className="h-4 w-4" />
                 Izračunaj preostale rate
               </Button>
@@ -159,7 +172,7 @@ export const CreditStatusForm = () => {
               
               <PaymentScheduleDisplay 
                 unsettledAmount={parseFloat(unsettledAmount)}
-                annuity={creditDetails.annuity}
+                annuity={parseFloat(annuity)}
                 interestRate={creditDetails.nominalRate}
               />
             </CardContent>
@@ -171,7 +184,7 @@ export const CreditStatusForm = () => {
           <CardContent className="text-center text-sm text-gray-600 py-4">
             <p>NAPOMENA: Iskazana EKS važi na datum izrade plana otplate kredita</p>
             <Separator className="my-2" />
-            <p>© 2025 Banca Intesa ad Beograd - Kalkulator otplate kredita</p>
+            <p>© 2025 Banca ad Beograd - Kalkulator otplate kredita</p>
           </CardContent>
         </Card>
       </div>
