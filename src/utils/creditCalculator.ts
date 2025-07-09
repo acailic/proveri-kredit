@@ -48,17 +48,18 @@ export const calculateRemainingPayments = (
 export const generatePaymentSchedule = (
   unsettledAmount: number,
   annuity: number,
-  interestRate: number,
-  maxPayments: number = 10
+  interestRate: number
 ): PaymentScheduleItem[] => {
   const monthlyRate = interestRate / 100 / 12;
   const schedule: PaymentScheduleItem[] = [];
   let remainingBalance = unsettledAmount;
   const currentDate = new Date();
+  let paymentCount = 0;
 
-  for (let i = 0; i < maxPayments && remainingBalance > 0.01; i++) {
+  // Generate all payments until balance is paid off (with safety limit)
+  while (remainingBalance > 0.01 && paymentCount < 1000) {
     const paymentDate = new Date(currentDate);
-    paymentDate.setMonth(paymentDate.getMonth() + i + 1);
+    paymentDate.setMonth(paymentDate.getMonth() + paymentCount + 1);
     paymentDate.setDate(20); // Set to 20th of each month as per the original schedule
 
     const interestPayment = remainingBalance * monthlyRate;
@@ -69,13 +70,15 @@ export const generatePaymentSchedule = (
     remainingBalance -= principalPayment;
 
     schedule.push({
-      paymentNumber: i + 1,
+      paymentNumber: paymentCount + 1,
       date: paymentDate.toLocaleDateString('sr-RS'),
       annuity: annuity,
       principal: principalPayment,
       interest: interestPayment,
       remainingBalance: Math.max(0, remainingBalance)
     });
+
+    paymentCount++;
   }
 
   return schedule;
