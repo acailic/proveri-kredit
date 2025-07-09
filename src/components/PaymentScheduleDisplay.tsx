@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { generatePaymentSchedule } from '../utils/creditCalculator';
 
 interface PaymentScheduleDisplayProps {
@@ -17,11 +18,37 @@ export const PaymentScheduleDisplay: React.FC<PaymentScheduleDisplayProps> = ({
   interestRate
 }) => {
   const schedule = generatePaymentSchedule(unsettledAmount, annuity, interestRate);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  
+  const totalPages = Math.ceil(schedule.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentSchedule = schedule.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-lg">Plan otplate preostalih rata</CardTitle>
+        <p className="text-sm text-gray-600">
+          Prikazano {startIndex + 1}-{Math.min(endIndex, schedule.length)} od {schedule.length} rata
+        </p>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
@@ -37,10 +64,10 @@ export const PaymentScheduleDisplay: React.FC<PaymentScheduleDisplayProps> = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {schedule.map((payment, index) => (
-                <TableRow key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+              {currentSchedule.map((payment, index) => (
+                <TableRow key={startIndex + index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                   <TableCell className="text-center font-medium">
-                    <Badge variant={index === 0 ? 'default' : 'outline'}>
+                    <Badge variant={startIndex + index === 0 ? 'default' : 'outline'}>
                       {payment.paymentNumber}
                     </Badge>
                   </TableCell>
@@ -63,11 +90,37 @@ export const PaymentScheduleDisplay: React.FC<PaymentScheduleDisplayProps> = ({
           </Table>
         </div>
         
-        {schedule.length > 10 && (
-          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-blue-800">
-              <strong>Napomena:</strong> Prikazano je prvih 10 rata. Kompletan plan otplate sadrži {schedule.length} rata.
-            </p>
+        {totalPages > 1 && (
+          <div className="mt-6 flex justify-center">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={handlePrevious}
+                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  />
+                </PaginationItem>
+                
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      onClick={() => handlePageChange(page)}
+                      isActive={currentPage === page}
+                      className="cursor-pointer"
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={handleNext}
+                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
           </div>
         )}
       </CardContent>
