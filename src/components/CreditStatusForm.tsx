@@ -32,6 +32,8 @@ export const CreditStatusForm = () => {
     if (amount && amount > 0 && annuityValue && annuityValue > 0) {
       const result = calculateRemainingPayments(amount, annuityValue, nominalRateValue);
       setCalculationResult(result);
+      // Set unsettled amount equal to total payment amount
+      setUnsettledAmount(result.totalToPay.toString());
     }
   };
 
