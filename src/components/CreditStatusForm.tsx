@@ -13,16 +13,14 @@ export const CreditStatusForm = () => {
   const [unsettledAmount, setUnsettledAmount] = useState<string>('');
   const [creditAmount, setCreditAmount] = useState<string>('92663.85');
   const [annuity, setAnnuity] = useState<string>('786.25');
+  const [nominalRate, setNominalRate] = useState<string>('3.39');
+  const [effectiveRate, setEffectiveRate] = useState<string>('3.76');
+  const [numberOfPayments, setNumberOfPayments] = useState<string>('144');
   const [calculationResult, setCalculationResult] = useState<any>(null);
 
-  // Credit details from the document
+  // Credit details
   const creditDetails = {
-    bankName: "Banca ad Beograd",
-    phone: "011/310-8888",
-    date: "09.07.2025.",
     currency: "EUR",
-    nominalRate: 3.39,
-    effectiveRate: 3.76,
     startDate: "20.01.2022",
     endDate: "20.01.2034"
   };
@@ -30,8 +28,9 @@ export const CreditStatusForm = () => {
   const handleCalculate = () => {
     const amount = parseFloat(unsettledAmount);
     const annuityValue = parseFloat(annuity);
+    const nominalRateValue = parseFloat(nominalRate);
     if (amount && amount > 0 && annuityValue && annuityValue > 0) {
-      const result = calculateRemainingPayments(amount, annuityValue, creditDetails.nominalRate);
+      const result = calculateRemainingPayments(amount, annuityValue, nominalRateValue);
       setCalculationResult(result);
     }
   };
@@ -40,18 +39,19 @@ export const CreditStatusForm = () => {
     setUnsettledAmount('');
     setCreditAmount('92663.85');
     setAnnuity('786.25');
+    setNominalRate('3.39');
+    setEffectiveRate('3.76');
+    setNumberOfPayments('144');
     setCalculationResult(null);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="max-w-6xl mx-auto space-y-6">
-        {/* Bank Header */}
+        {/* Title Header */}
         <Card className="bg-gradient-to-r from-blue-900 to-blue-800 text-white">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">{creditDetails.bankName}</CardTitle>
-            <p className="text-blue-100">Tel/Fax: {creditDetails.phone}</p>
-            <p className="text-blue-100">Datum: {creditDetails.date}</p>
+            <CardTitle className="text-3xl font-bold">PROVERI KREDIT</CardTitle>
           </CardHeader>
         </Card>
 
@@ -95,14 +95,44 @@ export const CreditStatusForm = () => {
             
             <Separator />
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label className="text-sm font-semibold">Nominalna kamatna stopa:</Label>
-                <p className="text-base font-semibold text-orange-600">{creditDetails.nominalRate}% FIKSNA</p>
+                <Label htmlFor="nominal-rate" className="text-sm font-semibold">Nominalna kamatna stopa:</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="nominal-rate"
+                    type="number"
+                    step="0.01"
+                    value={nominalRate}
+                    onChange={(e) => setNominalRate(e.target.value)}
+                    className="text-base font-semibold text-orange-600"
+                  />
+                  <span className="text-base font-semibold text-orange-600">% FIKSNA</span>
+                </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-semibold">Efektivna kamatna stopa:</Label>
-                <p className="text-base font-semibold text-red-600">{creditDetails.effectiveRate}%</p>
+                <Label htmlFor="effective-rate" className="text-sm font-semibold">Efektivna kamatna stopa:</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="effective-rate"
+                    type="number"
+                    step="0.01"
+                    value={effectiveRate}
+                    onChange={(e) => setEffectiveRate(e.target.value)}
+                    className="text-base font-semibold text-red-600"
+                  />
+                  <span className="text-base font-semibold text-red-600">%</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="number-of-payments" className="text-sm font-semibold">Broj rata:</Label>
+                <Input
+                  id="number-of-payments"
+                  type="number"
+                  value={numberOfPayments}
+                  onChange={(e) => setNumberOfPayments(e.target.value)}
+                  className="text-base font-semibold text-blue-600"
+                />
               </div>
             </div>
           </CardContent>
@@ -173,7 +203,7 @@ export const CreditStatusForm = () => {
               <PaymentScheduleDisplay 
                 unsettledAmount={parseFloat(unsettledAmount)}
                 annuity={parseFloat(annuity)}
-                interestRate={creditDetails.nominalRate}
+                interestRate={parseFloat(nominalRate)}
               />
             </CardContent>
           </Card>
@@ -184,7 +214,7 @@ export const CreditStatusForm = () => {
           <CardContent className="text-center text-sm text-gray-600 py-4">
             <p>NAPOMENA: Iskazana EKS važi na datum izrade plana otplate kredita</p>
             <Separator className="my-2" />
-            <p>© 2025 Banca ad Beograd - Kalkulator otplate kredita</p>
+            <p>© 2025 Kalkulator otplate kredita</p>
           </CardContent>
         </Card>
       </div>
